@@ -6,10 +6,7 @@ import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
-# Password hashing
 ph = PasswordHasher()
-
-# Database configuration
 DB_PATH = "ipl_fantasy.db"
 
 engine = create_engine(
@@ -38,7 +35,6 @@ class User(Base):
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-
 # Create JWT token
 def create_token(username, role, token_type):
 
@@ -55,8 +51,7 @@ def create_token(username, role, token_type):
     )
 
     return token
-
-
+    
 # Verify JWT token
 def verify_token(token, token_type):
 
@@ -69,7 +64,6 @@ def verify_token(token, token_type):
         return None
 
     return payload
-
 
 # A3 - Refresh access token
 def refresh_access_token(refresh_token):
