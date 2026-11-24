@@ -38,13 +38,6 @@ The application includes role-based access for admins, organizers and users. Org
 | GitHub Repository | [GitHub repository URL] |
 
 ## 4. How to Run It
-
-### Requirements
-
-- Git
-- Python 3.12+
-- Docker
-
 ### Run Locally
 
 ```bash
@@ -214,13 +207,7 @@ SQLite tables must include relationships among users, roles, players, tournament
 
 GitHub Actions must build the Docker image, push it to Docker Hub and deploy it to EC2.
 
-Configure these GitHub Actions secrets:
-
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
-- `EC2_HOST`
-- `EC2_USERNAME`
-- `EC2_SSH_KEY`
+Configure the GitHub Actions secrets.
 
 Deployment should pull the latest image, stop and remove the existing container, and start a replacement with the SQLite directory mounted persistently.
 
