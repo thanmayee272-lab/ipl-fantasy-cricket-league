@@ -49,8 +49,6 @@ def create_token(username, role, token_type):
         key=SECRET_KEY,
         algorithm=ALGORITHM
     )
-
-
 # Verify JWT token
 def verify_token(token, token_type):
 
