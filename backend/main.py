@@ -1,30 +1,8 @@
 from fastapi import FastAPI, HTTPException, Header
-from pydantic import BaseModel, Field
 import functions 
+from model import Users, Organizer, Player, RefreshToken, Match, Tournament, FantasyTeam, FantasyTeamPlayer, Contest, JoinContest, PlayerPerformance, MatchPerformance
 
 app = FastAPI()
-
-class Users(BaseModel):
-    username: str
-    password: str
-
-class UserLogin(BaseModel):
-    user_name: str = Field(min_length=1)
-    password: str = Field(min_length=1)
-
-class OrganizerRegister(BaseModel):
-    user_name: str = Field(min_length=3)
-    password: str = Field(min_length=6)
-    
-
-class RefreshTokenRequest(BaseModel):
-    refresh_token: str
-    
-class PlayerDetails(BaseModel):
-    name: str
-    role: str
-    team: str
-    base_points: int
 
 @app.get("/")
 def hello():
@@ -43,7 +21,7 @@ def register(user: Users):
 
 # A2
 @app.post("/auth/login")
-def login(user: UserLogin):
+def login(user: Users):
     token = functions.verify_login(username=user.user_name, password=user.password)
     if not token:
         raise HTTPException(status_code=401, detail="Invalid username or password")
@@ -58,17 +36,15 @@ def check_role(token, allowed_roles):
         raise HTTPException(status_code=403, detail="Permission denied")
 
 @app.post("/auth/refresh")
-def refresh(data: RefreshTokenRequest):
-
+def refresh(data: RefreshToken):
     response = function.refresh_access_token( refresh_token=data.refresh_token)
     if not response: raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
 
     return response  
 
-
 # E1
 @app.post("/admin/organizers")
-def create_organizer(user: OrganizerRegister, token=Header(None)):
+def create_organizer(user: Organizer, token=Header(None)):
     check_role(token, ["admin"])
     if functions.create_organizer(user_name=user.user_name, password=user.password):
         return {"message": "Organizer created successfully"}
@@ -76,7 +52,7 @@ def create_organizer(user: OrganizerRegister, token=Header(None)):
 
 
 @app.post("/players")
-def add_player(data: PlayerDetails, token: str = Header(...)):
+def add_player(data: Player, token: str = Header(...)):
     payload = function.verify_token(token, "access")
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -85,6 +61,4 @@ def add_player(data: PlayerDetails, token: str = Header(...)):
     if data.role.lower() not in ["batsman", "bowler", "all-rounder", "wicketkeeper"]:
         raise HTTPException(status_code=400, detail="Invalid player role")
     response = function.add_player( name=data.name, role=data.role,team=data.team,base_points=data.base_points )
-
     return response
-
