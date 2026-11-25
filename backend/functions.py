@@ -93,13 +93,11 @@ Base.metadata.create_all(engine)
 # A1
 def register_user(user_name: str, password: str, user_type: str = "user"):
     session = Session(engine)
-    user_exists = session.query(User).filter_by(username=user_name).first()
+    user_exists = session.query(Users).filter_by(username=user_name).first()
     if user_exists:
         session.close()
         return False
-    session.add(
-        User(username=user_name, password=ph.hash(password), user_type=user_type)
-    )
+    session.add(Users(username=user_name, password=ph.hash(password), user_type=user_type))
     session.commit()
     session.close()
     return True
@@ -152,6 +150,7 @@ def get_user_type(username):
     session.close()
     return user_type
 
+# E1
 def create_organizer(user_name, password):
     session = Session(engine)
     existing_user = session.query(Users).filter(Users.user_name == user_name).first()

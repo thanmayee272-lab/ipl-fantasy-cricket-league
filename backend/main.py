@@ -1,8 +1,12 @@
 from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel, Field
-import functions
+import functions 
 
 app = FastAPI()
+
+class Users(BaseModel):
+    username: str
+    password: str
 
 class UserLogin(BaseModel):
     user_name: str = Field(min_length=1)
@@ -19,7 +23,7 @@ def hello():
     
 # A1
 @app.post("/auth/register", status_code=201)
-def register(user: User):
+def register(user: Users):
     if user.username.strip() == "" or user.password.strip() == "":
         raise HTTPException(status_code=422, detail="Username and password are required")
     response = functions.register_user(user_name=user.username, password=user.password, user_type="user")
