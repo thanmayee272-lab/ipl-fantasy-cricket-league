@@ -50,7 +50,7 @@ def create_organizer(user: Organizer, token=Header(None)):
         return {"message": "Organizer created successfully"}
     raise HTTPException(status_code=409, detail="User already exists")
 
-
+# E2
 @app.post("/players")
 def add_player(data: Player, token: str = Header(...)):
     payload = function.verify_token(token, "access")
@@ -62,3 +62,13 @@ def add_player(data: Player, token: str = Header(...)):
         raise HTTPException(status_code=400, detail="Invalid player role")
     response = function.add_player( name=data.name, role=data.role,team=data.team,base_points=data.base_points )
     return response
+
+# E3
+@app.get("/players")
+def get_players(role: str = None, team: str = None, token: str = Header(None)):
+    payload = functions.verify_token(token=token, token_type="access")
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    if role is not None and role.lower() not in functions.PLAYER_ROLES:
+        raise HTTPException(status_code=422, detail="Invalid player role")
+    return functions.get_all_players(role.lower() if role else None, team)

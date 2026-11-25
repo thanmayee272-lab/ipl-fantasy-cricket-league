@@ -193,3 +193,15 @@ def add_player(name, role, team, base_points):
     session.close()
 
     return { "message": "Player added successfully", "player_id": player_id, "name": name, "role": role, "team": team, "base_points": base_points}
+
+# E3
+def get_all_players(role=None, team=None):
+    session = Session(engine)
+    players = session.query(Players)
+    if role:
+        players = players.filter(Players.role == role)
+    if team:
+        players = players.filter(Players.team == team)
+    response = [player_details(p)for p in players.all()]
+    session.close()
+    return response
