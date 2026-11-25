@@ -150,6 +150,26 @@ def get_user_type(username):
     session.close()
     return user_type
 
+# A3 
+def refresh_access_token(refresh_token):
+    payload = verify_token(token=refresh_token, token_type="refresh")
+
+    if not payload:
+        return False
+    username = payload.get("username")
+    if not username:
+        return False
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=username).first()
+    if user is None:
+        session.close()
+        return False
+
+    access_token = create_token( username=user.user_name, role=user.role, token_type="access" )
+    session.close()
+    return {"access_token": access_token}
+        
+
 # E1
 def create_organizer(user_name, password):
     session = Session(engine)
@@ -163,4 +183,13 @@ def create_organizer(user_name, password):
     session.close()
     return True
 
+# E2
+def add_player(name, role, team, base_points):
+    session = Session(engine)
+    player = Players( name=name,  role=role, team=team, base_points=base_points)
+    session.add(player)
+    session.commit()
+    player_id = player.id
+    session.close()
 
+    return { "message": "Player added successfully", "player_id": player_id, "name": name, "role": role, "team": team, "base_points": base_points}

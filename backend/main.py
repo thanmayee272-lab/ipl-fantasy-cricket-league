@@ -17,6 +17,15 @@ class OrganizerRegister(BaseModel):
     password: str = Field(min_length=6)
     
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+    
+class PlayerDetails(BaseModel):
+    name: str
+    role: str
+    team: str
+    base_points: int
+
 @app.get("/")
 def hello():
     return {"message": "Welcome to IPL Fantasy Cricket League"}
@@ -48,6 +57,15 @@ def check_role(token, allowed_roles):
     if user_type not in allowed_roles:
         raise HTTPException(status_code=403, detail="Permission denied")
 
+@app.post("/auth/refresh")
+def refresh(data: RefreshTokenRequest):
+
+    response = function.refresh_access_token( refresh_token=data.refresh_token)
+    if not response: raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    return response  
+
+
 # E1
 @app.post("/admin/organizers")
 def create_organizer(user: OrganizerRegister, token=Header(None)):
@@ -55,3 +73,18 @@ def create_organizer(user: OrganizerRegister, token=Header(None)):
     if functions.create_organizer(user_name=user.user_name, password=user.password):
         return {"message": "Organizer created successfully"}
     raise HTTPException(status_code=409, detail="User already exists")
+
+
+@app.post("/players")
+def add_player(data: PlayerDetails, token: str = Header(...)):
+    payload = function.verify_token(token, "access")
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if payload["role"].lower() != "organizer":
+        raise HTTPException(status_code=403, detail="Only organizers can add players")
+    if data.role.lower() not in ["batsman", "bowler", "all-rounder", "wicketkeeper"]:
+        raise HTTPException(status_code=400, detail="Invalid player role")
+    response = function.add_player( name=data.name, role=data.role,team=data.team,base_points=data.base_points )
+
+    return response
+
