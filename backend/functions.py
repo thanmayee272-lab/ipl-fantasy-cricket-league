@@ -35,7 +35,11 @@ class FantasyTeams(Base):
     __tablename__ = "fantasy_teams"
     id = Column(Integer, primary_key=True)
     team_name = Column(String)
+<<<<<<< HEAD
     user_id = Column(Integer, ForeignKey("user.user_id"))
+=======
+    user_id = Column(Integer, ForeignKey("users.id"))
+>>>>>>> 9da50fd35db88894f9cd778f2f49d800d350aee6
     match_id = Column(Integer, ForeignKey("matches.id"))
 
 class FantasyTeamPlayers(Base):
@@ -71,25 +75,53 @@ class Tournaments(Base):
     id = Column(Integer, primary_key=True)
     tournament_name = Column(String)
     season = Column(String)
+<<<<<<< HEAD
     created_by = Column(Integer, ForeignKey("user.user_id"))  
+=======
+    created_by = Column(Integer, ForeignKey("users.id"))  
+>>>>>>> 9da50fd35db88894f9cd778f2f49d800d350aee6
   
 class Contests(Base):
     __tablename__ = "contests"
     id = Column(Integer, primary_key=True)
     contest_name = Column(String)
     match_id = Column(Integer, ForeignKey("matches.id"))
+<<<<<<< HEAD
     created_by = Column(Integer, ForeignKey("user.user_id"))
+=======
+    created_by = Column(Integer, ForeignKey("users.id"))
+>>>>>>> 9da50fd35db88894f9cd778f2f49d800d350aee6
 
 class ContestEntries(Base):
     __tablename__ = "contest_entries"
     id = Column(Integer, primary_key=True)
     contest_id = Column(Integer, ForeignKey("contests.id"))
     fantasy_team_id = Column(Integer, ForeignKey("fantasy_teams.id"))
+<<<<<<< HEAD
     user_id = Column(Integer, ForeignKey("user.user_id"))
+=======
+    user_id = Column(Integer, ForeignKey("users.id"))
+>>>>>>> 9da50fd35db88894f9cd778f2f49d800d350aee6
 
 Base.metadata.create_all(engine)
 
 
+<<<<<<< HEAD
+=======
+# A1
+def register_user(user_name: str, password: str, user_type: str = "user"):
+    session = Session(engine)
+    user_exists = session.query(Users).filter_by(username=user_name).first()
+    if user_exists:
+        session.close()
+        return False
+    session.add(Users(username=user_name, password=ph.hash(password), user_type=user_type))
+    session.commit()
+    session.close()
+    return True
+
+
+>>>>>>> 9da50fd35db88894f9cd778f2f49d800d350aee6
 # A2
 def verify_login(username, password):
     session = Session(engine)
@@ -137,6 +169,30 @@ def get_user_type(username):
     session.close()
     return user_type
 
+<<<<<<< HEAD
+=======
+# A3 
+def refresh_access_token(refresh_token):
+    payload = verify_token(token=refresh_token, token_type="refresh")
+
+    if not payload:
+        return False
+    username = payload.get("username")
+    if not username:
+        return False
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=username).first()
+    if user is None:
+        session.close()
+        return False
+
+    access_token = create_token( username=user.user_name, role=user.role, token_type="access" )
+    session.close()
+    return {"access_token": access_token}
+        
+
+# E1
+>>>>>>> 9da50fd35db88894f9cd778f2f49d800d350aee6
 def create_organizer(user_name, password):
     session = Session(engine)
     existing_user = session.query(Users).filter(Users.user_name == user_name).first()
@@ -149,4 +205,17 @@ def create_organizer(user_name, password):
     session.close()
     return True
 
+<<<<<<< HEAD
 
+=======
+# E2
+def add_player(name, role, team, base_points):
+    session = Session(engine)
+    player = Players( name=name,  role=role, team=team, base_points=base_points)
+    session.add(player)
+    session.commit()
+    player_id = player.id
+    session.close()
+
+    return { "message": "Player added successfully", "player_id": player_id, "name": name, "role": role, "team": team, "base_points": base_points}
+>>>>>>> 9da50fd35db88894f9cd778f2f49d800d350aee6
