@@ -90,6 +90,21 @@ class ContestEntries(Base):
 Base.metadata.create_all(engine)
 
 
+# A1
+def register_user(user_name: str, password: str, user_type: str = "user"):
+    session = Session(engine)
+    user_exists = session.query(User).filter_by(username=user_name).first()
+    if user_exists:
+        session.close()
+        return False
+    session.add(
+        User(username=user_name, password=ph.hash(password), user_type=user_type)
+    )
+    session.commit()
+    session.close()
+    return True
+
+
 # A2
 def verify_login(username, password):
     session = Session(engine)
