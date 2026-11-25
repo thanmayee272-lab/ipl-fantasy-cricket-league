@@ -21,7 +21,7 @@ class Users(Base):
     id = Column(Integer, primary_key=True)
     user_name = Column(String, unique=True)
     password = Column(String)
-    user_type = Column(String)     
+    user_type = Column(String, default="user") 
 
 class Players(Base):
     __tablename__ = "players"
@@ -34,15 +34,23 @@ class Players(Base):
 class FantasyTeams(Base):
     __tablename__ = "fantasy_teams"
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    name = Column(String)
+    team_name = Column(String)
+    user_id = Column(Integer, ForeignKey("user.user_id"))
+    match_id = Column(Integer, ForeignKey("matches.id"))
+
+class FantasyTeamPlayers(Base):
+    __tablename__ = "fantasy_team_players"
+    id = Column(Integer, primary_key=True)
+    fantasy_team_id = Column(Integer, ForeignKey("fantasy_teams.id"))
+    player_id = Column(Integer, ForeignKey("players.id"))
 
 class Matches(Base):
     __tablename__ = "matches"
     id = Column(Integer, primary_key=True)
     match_name = Column(String)
     match_date = Column(Date)
-    deadline = Column(DateTime)                   
+    deadline = Column(DateTime)  
+    status = Column(String, default="upcoming")                 
 
 class PlayerPerformances(Base):
     __tablename__ = "player_performances"
@@ -57,6 +65,27 @@ class PlayerPerformances(Base):
     run_outs = Column(Integer, default=0)
     stumpings = Column(Integer, default=0)
     fantasy_points = Column(Integer, default=0)    
+
+class Tournaments(Base):
+    __tablename__ = "tournaments"
+    id = Column(Integer, primary_key=True)
+    tournament_name = Column(String)
+    season = Column(String)
+    created_by = Column(Integer, ForeignKey("user.user_id"))  
+  
+class Contests(Base):
+    __tablename__ = "contests"
+    id = Column(Integer, primary_key=True)
+    contest_name = Column(String)
+    match_id = Column(Integer, ForeignKey("matches.id"))
+    created_by = Column(Integer, ForeignKey("user.user_id"))
+
+class ContestEntries(Base):
+    __tablename__ = "contest_entries"
+    id = Column(Integer, primary_key=True)
+    contest_id = Column(Integer, ForeignKey("contests.id"))
+    fantasy_team_id = Column(Integer, ForeignKey("fantasy_teams.id"))
+    user_id = Column(Integer, ForeignKey("user.user_id"))
 
 Base.metadata.create_all(engine)
 
@@ -79,6 +108,7 @@ def verify_login(username, password):
     refresh_token = create_token(username=username, token_type="refresh", user_type=user_type)
     return {"access_token": access_token, "refresh_token": refresh_token}
 
+# creating token 
 def create_token(username, token_type, user_type="user"):
     time = ACCESS_TOKEN_EXPIRY
     if token_type == "refresh":
@@ -86,4 +116,37 @@ def create_token(username, token_type, user_type="user"):
     payload = {"username": username, "token_type": token_type, "exp": datetime.now(timezone.utc) + timedelta(minutes=time), "user_type": user_type}
     token = jwt.encode(payload=payload, key=SECRET_KEY, algorithm=ALGORITHM)
     return token
+
+# verifying token
+def verify_token(token, token_type):
+    try:
+        payload = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])
+    except:
+        return False
+    if payload["token_type"] == token_type:
+        return payload["username"]
+    return False
+
+def get_user_type(username):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=username).first()
+    if user is None:
+        session.close()
+        return False
+    user_type = user.user_type
+    session.close()
+    return user_type
+
+def create_organizer(user_name, password):
+    session = Session(engine)
+    existing_user = session.query(Users).filter(Users.user_name == user_name).first()
+    if existing_user is not None:
+        session.close()
+        return False
+    user = Users(user_name=user_name, password=ph.hash(password), user_type="organizer")
+    session.add(user)
+    session.commit()
+    session.close()
+    return True
+
 

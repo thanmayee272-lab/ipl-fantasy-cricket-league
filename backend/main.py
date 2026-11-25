@@ -28,10 +28,10 @@ def check_role(token, allowed_roles):
     if user_type not in allowed_roles:
         raise HTTPException(status_code=403, detail="Permission denied")
 
-# # E1
-# @app.post("/admin/organizers")
-# def create_organizer(user: OrganizerRegister, token=Header(None)):
-#     check_role(token, ["admin"])
-#     if functions.create_organizer(user_name=user.user_name, password=user.password):
-#         return {"message": "Organizer created successfully"}
-#     raise HTTPException(status_code=409, detail="User already exists")
+# E1
+@app.post("/admin/organizers")
+def create_organizer(user: OrganizerRegister, token=Header(None)):
+    check_role(token, ["admin"])
+    if functions.create_organizer(user_name=user.user_name, password=user.password):
+        return {"message": "Organizer created successfully"}
+    raise HTTPException(status_code=409, detail="User already exists")
