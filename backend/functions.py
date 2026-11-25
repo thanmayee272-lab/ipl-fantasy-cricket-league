@@ -35,7 +35,7 @@ class FantasyTeams(Base):
     __tablename__ = "fantasy_teams"
     id = Column(Integer, primary_key=True)
     team_name = Column(String)
-    user_id = Column(Integer, ForeignKey("user.user_id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
     match_id = Column(Integer, ForeignKey("matches.id"))
 
 class FantasyTeamPlayers(Base):
@@ -71,21 +71,21 @@ class Tournaments(Base):
     id = Column(Integer, primary_key=True)
     tournament_name = Column(String)
     season = Column(String)
-    created_by = Column(Integer, ForeignKey("user.user_id"))  
+    created_by = Column(Integer, ForeignKey("users.id"))  
   
 class Contests(Base):
     __tablename__ = "contests"
     id = Column(Integer, primary_key=True)
     contest_name = Column(String)
     match_id = Column(Integer, ForeignKey("matches.id"))
-    created_by = Column(Integer, ForeignKey("user.user_id"))
+    created_by = Column(Integer, ForeignKey("users.id"))
 
 class ContestEntries(Base):
     __tablename__ = "contest_entries"
     id = Column(Integer, primary_key=True)
     contest_id = Column(Integer, ForeignKey("contests.id"))
     fantasy_team_id = Column(Integer, ForeignKey("fantasy_teams.id"))
-    user_id = Column(Integer, ForeignKey("user.user_id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
 
 Base.metadata.create_all(engine)
 
