@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 
 from fastapi import FastAPI, HTTPException,Header
@@ -60,6 +61,12 @@ from fastapi import FastAPI, HTTPException, Header
 import functions
 from model import (User, UserLogin,Organizer, Player, RefreshToken, Tournament, FantasyTeamPlayer)
 >>>>>>> Stashed changes
+=======
+
+from fastapi import FastAPI, HTTPException, Header
+import functions
+from model import (User, UserLogin,Organizer, Player, RefreshToken, Tournament, FantasyTeamPlayer)
+>>>>>>> Stashed changes
 
 app = FastAPI()
 
@@ -109,7 +116,13 @@ def register(user: User):
 @app.post("/auth/login")
 def login(user: UserLogin):
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     token = functions.verify_login(username=user.user_name, password=user.password)
+=======
+
+    token = functions.verify_login( username=user.user_name,  password=user.password )
+
+>>>>>>> Stashed changes
 =======
 
     token = functions.verify_login( username=user.user_name,  password=user.password )
@@ -121,6 +134,7 @@ def login(user: UserLogin):
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 # E1
 @app.post("/admin/organizers")
 def create_organizer(user: OrganizerRegister, token=Header(None)):
@@ -130,6 +144,8 @@ def create_organizer(user: OrganizerRegister, token=Header(None)):
     raise HTTPException(status_code=409, detail="User already exists")
 >>>>>>> b19fcbec8da798ea6603387c2c5c0fd50de24846
 =======
+=======
+>>>>>>> Stashed changes
 # A3 - REFRESH TOKEN
 @app.post("/auth/refresh")
 def refresh(data: RefreshToken):
@@ -179,4 +195,7 @@ def get_players(role: str = None,team: str = None,token: str = Header(...)):
     )
 
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

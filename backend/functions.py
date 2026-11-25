@@ -197,8 +197,11 @@ def get_user_type(username):
     return user_type
 
 
+<<<<<<< Updated upstream
 # E1
 
+=======
+>>>>>>> Stashed changes
 # A3 - REFRESH TOKEN
 def refresh_access_token(refresh_token):
     payload = verify_token(refresh_token, "refresh")
@@ -237,6 +240,10 @@ def create_organizer(user_name, password):
 
     return True
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 # E2 - ADD PLAYER
 def add_player(name, role, team, base_points):
     session = Session(engine)
@@ -269,3 +276,7 @@ def get_all_players(role=None, team=None):
 
     return response
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
