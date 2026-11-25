@@ -11,6 +11,22 @@ class UserLogin(BaseModel):
 class OrganizerRegister(BaseModel):
     user_name: str = Field(min_length=3)
     password: str = Field(min_length=6)
+    
+
+@app.get("/")
+def hello():
+    return {"message": "Welcome to IPL Fantasy Cricket League"}
+    
+# A1
+@app.post("/auth/register", status_code=201)
+def register(user: User):
+    if user.username.strip() == "" or user.password.strip() == "":
+        raise HTTPException(status_code=422, detail="Username and password are required")
+    response = functions.register_user(user_name=user.username, password=user.password, user_type="user")
+    if response:
+        return {"message": "User registered successfully"}
+    raise HTTPException(status_code=400, detail="User already exists")
+
 
 # A2
 @app.post("/auth/login")
