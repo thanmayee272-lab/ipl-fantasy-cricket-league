@@ -100,3 +100,12 @@ def add_fantasy_team(data: FantasyTeam, token: str = Header()):
     if not result:
         raise HTTPException(status_code=400, detail="Invalid match")
     return result
+
+@app.post("/fantasy-teams/{fantasy_team_id}/players")
+def add_player_to_team(fantasy_team_id: int, data: FantasyTeamPlayer, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    result = functions.add_player_to_fantasy_team( user_name,fantasy_team_id, data.player_id)
+    if not result:
+        raise HTTPException( status_code=400,detail="Could not add player. Check team ownership, deadline, role limit and 11-player limit.")
+    return result

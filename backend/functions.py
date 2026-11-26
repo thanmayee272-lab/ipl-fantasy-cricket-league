@@ -293,3 +293,53 @@ def create_fantasy_team(user_name, team_name, match_id):
     team_id = team.id
     session.close()
     return {"message": "Fantasy team created successfully", "fantasy_team_id": team_id, "team_name": team_name, "match_id": match_id}
+
+#E8
+def add_player_to_fantasy_team(user_name, fantasy_team_id, player_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    fantasy_team = session.query(FantasyTeams).filter_by(id=fantasy_team_id).first()
+    player = session.query(Players).filter_by(id=player_id).first()
+
+    if user is None or fantasy_team is None or player is None:
+        session.close()
+        return False
+
+    if fantasy_team.user_id != user.id:
+        session.close()
+        return False
+
+    match = session.query(Matches).filter_by(id=fantasy_team.match_id).first()
+    if match is None:
+        session.close()
+        return False
+    deadline = match.deadline
+    if deadline is not None:
+        if datetime.now() > deadline:
+            session.close()
+            return False
+    existing_player = session.query(FantasyTeamPlayers).filter_by(fantasy_team_id=fantasy_team_id, player_id=player_id).first()
+    if existing_player is not None:
+        session.close()
+        return False
+    team_players = session.query(FantasyTeamPlayers).filter_by( fantasy_team_id=fantasy_team_id).all()
+    if len(team_players) >= 11:
+        session.close()
+        return False
+    role_limits = { "batsman": 5, "bowler": 5,"all-rounder": 3, "wicketkeeper": 1}
+    role_count = 0
+    for team_player in team_players:
+        old_player = session.query(Players).filter_by(id=team_player.player_id).first()
+        if old_player and old_player.role == player.role:
+            role_count += 1
+    if role_count >= role_limits[player.role]:
+        session.close()
+        return False
+    new_player = FantasyTeamPlayers(fantasy_team_id=fantasy_team_id, player_id=player_id)
+
+    session.add(new_player)
+    session.commit()
+    session.close()
+    return {"message": "Player added to fantasy team successfully"}
+
+
