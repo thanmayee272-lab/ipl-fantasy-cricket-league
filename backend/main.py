@@ -101,6 +101,7 @@ def add_fantasy_team(data: FantasyTeam, token: str = Header()):
         raise HTTPException(status_code=400, detail="Invalid match")
     return result
 
+# E8
 @app.post("/fantasy-teams/{fantasy_team_id}/players")
 def add_player_to_team(fantasy_team_id: int, data: FantasyTeamPlayer, token: str = Header()):
     user_name = get_logged_in_user(token)
@@ -109,3 +110,15 @@ def add_player_to_team(fantasy_team_id: int, data: FantasyTeamPlayer, token: str
     if not result:
         raise HTTPException( status_code=400,detail="Could not add player. Check team ownership, deadline, role limit and 11-player limit.")
     return result
+
+
+# E9
+@app.delete("/fantasy-teams/{fantasy_team_id}/players/{player_id}")
+def remove_player_from_team(fantasy_team_id: int,player_id: int, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    result = functions.remove_player_from_fantasy_team(user_name,fantasy_team_id,player_id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Could not remove player")
+    return result
+

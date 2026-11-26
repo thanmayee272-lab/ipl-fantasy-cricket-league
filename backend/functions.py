@@ -343,3 +343,32 @@ def add_player_to_fantasy_team(user_name, fantasy_team_id, player_id):
     return {"message": "Player added to fantasy team successfully"}
 
 
+# E9
+def remove_player_from_fantasy_team(user_name, fantasy_team_id, player_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    fantasy_team = session.query(FantasyTeams).filter_by(id=fantasy_team_id).first()
+    if user is None or fantasy_team is None:
+        session.close()
+        return False
+    if fantasy_team.user_id != user.id:
+        session.close()
+        return False
+    match = session.query(Matches).filter_by(id=fantasy_team.match_id).first()
+    if match is None:
+        session.close()
+        return False
+    deadline = match.deadline
+    if deadline is not None:
+        if datetime.now() > deadline:
+            session.close()
+            return False
+    team_player = session.query(FantasyTeamPlayers).filter_by( fantasy_team_id=fantasy_team_id, player_id=player_id ).first()
+    if team_player is None:
+        session.close()
+        return False
+    session.delete(team_player)
+    session.commit()
+    session.close()
+    return {"message": "Player removed from fantasy team successfully"}
+
