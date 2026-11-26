@@ -195,7 +195,6 @@ def add_player(name, role, team, base_points):
         "player_id": player_id, "name": name,"role": role, "team": team, "base_points": base_points}
 
 # E3
-
 def get_all_players(role=None, team=None):
     session = Session(engine)
     players = session.query(Players)
@@ -209,3 +208,51 @@ def get_all_players(role=None, team=None):
     session.close()
     return response
 
+# E4
+def get_player_by_id(player_id):
+    session = Session(engine)
+    player = session.query(Players).filter_by(id=player_id).first()
+    if player is None:
+        session.close()
+        return False
+    response = {"id": player.id, "name": player.name, "role": player.role, "team": player.team, "base_points": player.base_points}
+    session.close()
+    return response
+
+#E5
+def create_tournament(user_name, tournament_name, season, matches):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    if user is None:
+        session.close()
+        return False
+    tournament = Tournaments(tournament_name=tournament_name, season=season, created_by=user.id)
+    session.add(tournament)
+    session.commit()
+    tournament_id = tournament.id
+    match_list = []
+    for match in matches:
+        new_match = Matches(
+            match_name=match["match_name"],
+            team_1=match["team_1"],
+            team_2=match["team_2"],
+            venue=match["venue"],
+            match_time=match["match_time"],
+            deadline=match["deadline"],
+            tournament_id=tournament_id,
+            status="upcoming")
+        session.add(new_match)
+        session.commit()
+        match_list.append({
+            "id": new_match.id,
+            "match_name": new_match.match_name,
+            "team_1": new_match.team_1,
+            "team_2": new_match.team_2,
+            "venue": new_match.venue,
+            "match_time": new_match.match_time,
+            "deadline": new_match.deadline,
+            "status": new_match.status})
+    session.close()
+    return {"message": "Tournament created successfully", "tournament_id": tournament_id, "tournament_name": tournament_name,
+        "season": season,
+        "matches": match_list}

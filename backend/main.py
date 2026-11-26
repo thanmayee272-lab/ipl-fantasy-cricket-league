@@ -65,3 +65,23 @@ def add_player(data: Player, token: str = Header()):
 def get_players(role: str = None, team: str = None):
     return functions.get_all_players(role, team)
 
+# E4
+@app.get("/players/{player_id}")
+def get_player(player_id: int):
+    result = functions.get_player_by_id(player_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Player not found")
+    return result
+
+# E5 
+@app.post("/tournaments")
+def add_tournament(data: Tournament, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "organizer")
+    match_list = []
+    for match in data.matches:
+        match_list.append({"match_name": match.match_name, "team_1": match.team_1,"team_2": match.team_2,"venue": match.venue,"match_time": match.match_time, "deadline": match.deadline })
+    result = functions.create_tournament( user_name, data.tournament_name, data.season, match_list)
+    if not result:
+        raise HTTPException(status_code=400, detail="Could not create tournament")
+    return result
