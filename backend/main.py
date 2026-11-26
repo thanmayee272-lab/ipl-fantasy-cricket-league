@@ -87,3 +87,9 @@ def add_tournament(data: Tournament, token: str = Header()):
     if not result:
         raise HTTPException(status_code=400, detail="Could not create tournament")
     return result
+
+
+# E6
+@app.get("/tournaments")
+def get_tournaments():
+    return functions.get_all_tournaments()

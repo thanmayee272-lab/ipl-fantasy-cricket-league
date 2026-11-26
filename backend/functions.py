@@ -258,4 +258,27 @@ def create_tournament(user_name, tournament_name, season, matches):
         "matches": match_list}
 
 
+# E6
+def get_all_tournaments():
+    session = Session(engine)
+    tournaments = session.query(Tournaments).all()
+    response = []
+    for tournament in tournaments:
+        matches = session.query(Matches).filter_by(tournament_id=tournament.id).all()
+        match_list = []
+        for match in matches:
+            match_list.append({
+                "id": match.id,
+                "match_name": match.match_name,
+                "team_1": match.team_1,
+                "team_2": match.team_2,
+                "venue": match.venue,
+                "match_time": match.match_time,
+                "deadline": match.deadline,
+                "status": match.status
+            }) 
+
+        response.append({"id": tournament.id,"tournament_name": tournament.tournament_name,"season": tournament.season,"matches": match_list})
+    session.close()
+    return response
 
