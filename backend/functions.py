@@ -4,6 +4,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from sqlalchemy import Integer, String, Column, create_engine, DateTime, ForeignKey
 from sqlalchemy.orm import Session, declarative_base
+import os
 
 DB_PATH = "fantasy.db"
 engine = create_engine(f"sqlite:///{DB_PATH}")
@@ -87,7 +88,7 @@ class PlayerPerformances(Base):
 Base.metadata.create_all(engine)
 ACCESS_TOKEN_EXPIRY = 15
 REFRESH_TOKEN_EXPIRY = 7 * 24 * 60
-SECRET_KEY = "ipl_fantasy_secret_key_change_before_deployment_2026"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 ph = PasswordHasher()
