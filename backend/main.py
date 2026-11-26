@@ -148,3 +148,17 @@ def join_contest(contest_id: int, data: JoinContest,token: str = Header()):
     if not result:
         raise HTTPException(status_code=400,detail="Could not join contest. Check team ownership, match and deadline.")
     return result
+
+# E13 
+@app.post("/matches/{match_id}/performances")
+def add_performances( match_id: int,data: MatchPerformance, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "organizer")
+    performance_list = []
+    for performance in data.performances:
+        performance_list.append({"player_id": performance.player_id,"runs": performance.runs,"fours": performance.fours,
+        "sixes": performance.sixes, "wickets": performance.wickets,"catches": performance.catches, "run_outs": performance.run_outs,"stumpings": performance.stumpings})
+    result = functions.publish_performances(match_id, performance_list)
+    if not result:
+        raise HTTPException( status_code=400, detail="Could not publish performances. Check match, players and duplicate records." )
+    return result

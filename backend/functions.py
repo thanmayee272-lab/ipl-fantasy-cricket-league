@@ -406,7 +406,6 @@ def create_contest(user_name, contest_name, match_id):
     session.close()
     return {"message": "Contest created successfully", "contest_id": contest_id, "contest_name": contest_name, "match_id": match_id}
 
-
 # E12
 def join_contest(user_name, contest_id, fantasy_team_id):
     session = Session(engine)
@@ -441,3 +440,55 @@ def join_contest(user_name, contest_id, fantasy_team_id):
     session.close()
     return {"message": "Joined contest successfully"}
 
+def calculate_fantasy_points(player, performance):
+    points = player.base_points
+    points = points + (performance["runs"])
+    points = points + (performance["fours"])
+    points = points + (performance["sixes"] * 2)
+    points = points + (performance["wickets"] * 25)
+    points = points + (performance["catches"] * 8)
+    points = points + (performance["run_outs"] * 12)
+    points = points + (performance["stumpings"] * 12)
+    return points
+
+# E13
+def publish_performances(match_id, performances):
+    session = Session(engine)
+    match = session.query(Matches).filter_by(id=match_id).first()
+    if match is None:
+        session.close()
+        return False
+    seen_ids = []
+    for performance in performances:
+        player_id = performance["player_id"]
+        if player_id in seen_ids:
+            session.close()
+            return False
+        seen_ids.append(player_id)
+        player = session.query(Players).filter_by(id=player_id).first()
+        if player is None:
+            session.close()
+            return False
+        old_performance = session.query(PlayerPerformances).filter_by(match_id=match_id,player_id=player_id).first()
+        if old_performance is not None:
+            session.close()
+            return False
+    for performance in performances:
+        player = session.query(Players).filter_by(id=performance["player_id"]).first()
+        points = calculate_fantasy_points(player, performance)
+        new_performance = PlayerPerformances(
+            match_id=match_id,
+            player_id=performance["player_id"],
+            runs=performance["runs"],
+            fours=performance["fours"],
+            sixes=performance["sixes"],
+            wickets=performance["wickets"],
+            catches=performance["catches"],
+            run_outs=performance["run_outs"],
+            stumpings=performance["stumpings"],
+            fantasy_points=points)
+        session.add(new_performance)
+    match.status = "completed"
+    session.commit()
+    session.close()
+    return {"message": "Player performances published successfully"}
