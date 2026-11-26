@@ -42,7 +42,7 @@ jobs:
             sudo systemctl enable --now docker
             sudo docker pull ${{ env.IMAGE }}:${{ env.VERSION }}
             sudo docker rm -f ipl-fantasy || true
-            sudo docker run -d --name ipl-fantasy --restart unless-stopped -p 8000:8000 -e SECRET_KEY='${{ secrets.SECRET_KEY }}' ${{ env.IMAGE }}:${{ env.VERSION }}
+            sudo docker run -d --name ipl-fantasy --restart unless-stopped -p 8000:8000 -v /opt/persnoalnotes/data:/app/data -e SECRET_KEY='${{ secrets.SECRET_KEY }}' ${{ env.IMAGE }}:${{ env.VERSION }}
             sudo docker image prune -af
             sudo docker ps --filter name=ipl-fantasy
             
