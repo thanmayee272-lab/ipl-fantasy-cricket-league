@@ -1,64 +1,72 @@
 from fastapi import FastAPI, HTTPException, Header
-import functions 
-from model import Users, Organizer, Player, RefreshToken, Match, Tournament, FantasyTeam, FantasyTeamPlayer, Contest, JoinContest, PlayerPerformance, MatchPerformance
-
+import functions
+from model import (User, UserLogin, RefreshToken, Organizer, Player, Tournament, FantasyTeam, FantasyTeamPlayer, Contest, JoinContest,MatchPerformance,)
 app = FastAPI()
 
-@app.get("/")
-def hello():
-    return {"message": "Welcome to IPL Fantasy Cricket League"}
-    
-# A1
-@app.post("/auth/register", status_code=201)
-def register(user: Users):
-    if user.username.strip() == "" or user.password.strip() == "":
-        raise HTTPException(status_code=422, detail="Username and password are required")
-    response = functions.register_user(user_name=user.username, password=user.password, user_type="user")
-    if response:
-        return {"message": "User registered successfully"}
-    raise HTTPException(status_code=400, detail="User already exists")
+def get_logged_in_user(token):
+    user_name = functions.verify_token(token, "access")
+    if not user_name:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return user_name
 
+def check_role(user_name, required_role):
+    user_type = functions.get_user_type(user_name)
+    if user_type != required_role:
+        raise HTTPException(status_code=403, detail="You do not have permission")
 
 # A2
 @app.post("/auth/login")
-def login(user: Users):
-    token = functions.verify_login(username=user.user_name, password=user.password)
-    if not token:
+def login(data: UserLogin):
+    result = functions.verify_login(data.user_name, data.password)
+    if not result:
         raise HTTPException(status_code=401, detail="Invalid username or password")
-    return token
+    return result
 
-def check_role(token, allowed_roles):
-    username = functions.verify_token(token=token, token_type="access")
-    if not username:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    user_type = functions.get_user_type(username)
-    if user_type not in allowed_roles:
-        raise HTTPException(status_code=403, detail="Permission denied")
+# E1 
+@app.post("/organizers")
+def add_organizer(data: Organizer, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "admin")
+    result = functions.create_organizer(data.user_name, data.password)
+    if not result:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    return {"message": "Organizer created successfully"}
 
-@app.post("/auth/refresh")
-def refresh(data: RefreshToken):
-    response = function.refresh_access_token( refresh_token=data.refresh_token)
-    if not response: raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+# E4
+@app.get("/players/{player_id}")
+def get_player(player_id: int):
+    result = functions.get_player_by_id(player_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Player not found")
+    return result
 
-    return response  
+# E7 
+@app.post("/fantasy-teams")
+def add_fantasy_team(data: FantasyTeam, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    result = functions.create_fantasy_team(user_name, data.team_name, data.match_id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Invalid match")
+    return result
 
-# E1
-@app.post("/admin/organizers")
-def create_organizer(user: Organizer, token=Header(None)):
-    check_role(token, ["admin"])
-    if functions.create_organizer(user_name=user.user_name, password=user.password):
-        return {"message": "Organizer created successfully"}
-    raise HTTPException(status_code=409, detail="User already exists")
+# E10 
+@app.get("/fantasy-teams")
+def get_my_teams(token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    return functions.get_my_fantasy_teams(user_name)
 
-
-@app.post("/players")
-def add_player(data: Player, token: str = Header(...)):
-    payload = function.verify_token(token, "access")
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    if payload["role"].lower() != "organizer":
-        raise HTTPException(status_code=403, detail="Only organizers can add players")
-    if data.role.lower() not in ["batsman", "bowler", "all-rounder", "wicketkeeper"]:
-        raise HTTPException(status_code=400, detail="Invalid player role")
-    response = function.add_player( name=data.name, role=data.role,team=data.team,base_points=data.base_points )
-    return response
+# E13 
+@app.post("/matches/{match_id}/performances")
+def add_performances( match_id: int,data: MatchPerformance, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "organizer")
+    performance_list = []
+    for performance in data.performances:
+        performance_list.append({"player_id": performance.player_id,"runs": performance.runs,"fours": performance.fours,
+        "sixes": performance.sixes, "wickets": performance.wickets,"catches": performance.catches, "run_outs": performance.run_outs,"stumpings": performance.stumpings})
+    result = functions.publish_performances(match_id, performance_list)
+    if not result:
+        raise HTTPException( status_code=400, detail="Could not publish performances. Check match, players and duplicate records." )
+    return result
