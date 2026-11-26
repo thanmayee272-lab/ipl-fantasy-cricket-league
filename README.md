@@ -15,18 +15,18 @@ The application includes role-based access for admins, organizers and users. Org
 
 | Role | Member | Responsibility |
 |---|---|---|
-| Backend Developer | Member 1 - [Name] | Authentication, admin APIs and repository/deployment setup |
-| Backend Developer | Member 2 - [Name] | Player, tournament and organizer APIs |
-| Backend Developer | Member 3 - [Name] | Fantasy team, contest and leaderboard APIs |
+| Backend Developer | Member 1 - [Lakshya] | Tables and Authentication, API 2(login),Implimented 5 endpoints and repository/deployment setup |
+| Backend Developer | Member 2 - [Thammiksha] |API 3(Refersh), Implimented 5 endpoints,repository/deployment setup |
+| Backend Developer | Member 3 - [Thanmayee] |  API 1 (Register), Implimented 5 endpoints,repository/deployment setup |
 
 
 ### 3-Day Work Plan
 
 | Member | Day 1 | Day 2 | Day 3 |
 |---|---|---|---|
-| Member 1 - [Name] | Set up FastAPI project, SQLite database and modular structure; implement JWT password security | Implement register, login and refresh APIs; implement admin create-organizer API | Complete remaining authentication/admin validation, Docker setup and CI/CD integration |
-| Member 2 - [Name] | Design player and tournament database models; implement role-based authorization | Implement cricket player create/get APIs and tournament create/get APIs | Integrate match data APIs, contest creation and performance publication |
-| Member 3 - [Name] | Design fantasy team, contest and points models | Implement fantasy team create/add/remove/list APIs and contest join API | Implement performance scoring, leaderboard and fantasy points history; test all APIs |
+| Member 1 - [Lakshya] | Implimented Tables and repository/deployment setup | Implimented Authentication and Implimented API's and Endpoints 1,4 | Implimented remaining endpoints and updated README.md. |
+| Member 2 - [Thammiksha] | Implimented Tables and repository/deployment setup | Implimented API's and Implimented Endpoints 2,5 | Implimented reaming endpoints and README.md |
+| Member 3 - [Thanmayee] | Implimented Tables and repository/deployment setup|  Implimented API's and Implimented Endpoints 3,6 |Implimented reaming endpoints and README.md |
 
 ## 3. Live App
 
