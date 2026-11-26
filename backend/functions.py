@@ -371,3 +371,23 @@ def remove_player_from_fantasy_team(user_name, fantasy_team_id, player_id):
     session.close()
     return {"message": "Player removed from fantasy team successfully"}
 
+# E10
+def get_my_fantasy_teams(user_name):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    if user is None:
+        session.close()
+        return []
+    teams = session.query(FantasyTeams).filter_by(user_id=user.id).all()
+    response = []
+    for team in teams:
+        team_players = session.query(FantasyTeamPlayers).filter_by(fantasy_team_id=team.id).all()
+        players = []
+        for team_player in team_players:
+            player = session.query(Players).filter_by(id=team_player.player_id).first()
+            if player:
+                players.append({"id": player.id,"name": player.name,"role": player.role,"team": player.team,"base_points": player.base_points})
+        response.append({"fantasy_team_id": team.id,"team_name": team.team_name,"match_id": team.match_id,"players": players})
+    session.close()
+    return response
+

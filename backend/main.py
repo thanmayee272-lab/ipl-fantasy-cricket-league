@@ -121,3 +121,9 @@ def remove_player_from_team(fantasy_team_id: int,player_id: int, token: str = He
         raise HTTPException(status_code=400, detail="Could not remove player")
     return result
 
+# E10 
+@app.get("/fantasy-teams")
+def get_my_teams(token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    return functions.get_my_fantasy_teams(user_name)
