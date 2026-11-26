@@ -194,32 +194,7 @@ def add_player(name, role, team, base_points):
     return {"message": "Player added successfully",
         "player_id": player_id, "name": name,"role": role, "team": team, "base_points": base_points}
 
-# E3
-def get_all_players(role=None, team=None):
-    session = Session(engine)
-    players = session.query(Players)
-    if role:
-        players = players.filter(Players.role == role.lower())
-    if team:
-        players = players.filter(Players.team == team)
-    response = []
-    for player in players.all():
-        response.append({"id": player.id, "name": player.name, "role": player.role,"team": player.team, "base_points": player.base_points})
-    session.close()
-    return response
-
-# E4
-def get_player_by_id(player_id):
-    session = Session(engine)
-    player = session.query(Players).filter_by(id=player_id).first()
-    if player is None:
-        session.close()
-        return False
-    response = {"id": player.id, "name": player.name, "role": player.role, "team": player.team, "base_points": player.base_points}
-    session.close()
-    return response
-
-#E5
+# E5
 def create_tournament(user_name, tournament_name, season, matches):
     session = Session(engine)
     user = session.query(Users).filter_by(user_name=user_name).first()
@@ -256,3 +231,103 @@ def create_tournament(user_name, tournament_name, season, matches):
     return {"message": "Tournament created successfully", "tournament_id": tournament_id, "tournament_name": tournament_name,
         "season": season,
         "matches": match_list}
+
+#E8
+def add_player_to_fantasy_team(user_name, fantasy_team_id, player_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    fantasy_team = session.query(FantasyTeams).filter_by(id=fantasy_team_id).first()
+    player = session.query(Players).filter_by(id=player_id).first()
+
+    if user is None or fantasy_team is None or player is None:
+        session.close()
+        return False
+
+    if fantasy_team.user_id != user.id:
+        session.close()
+        return False
+
+    match = session.query(Matches).filter_by(id=fantasy_team.match_id).first()
+    if match is None:
+        session.close()
+        return False
+    deadline = match.deadline
+    if deadline is not None:
+        if datetime.now() > deadline:
+            session.close()
+            return False
+    existing_player = session.query(FantasyTeamPlayers).filter_by(fantasy_team_id=fantasy_team_id, player_id=player_id).first()
+    if existing_player is not None:
+        session.close()
+        return False
+    team_players = session.query(FantasyTeamPlayers).filter_by( fantasy_team_id=fantasy_team_id).all()
+    if len(team_players) >= 11:
+        session.close()
+        return False
+    role_limits = { "batsman": 5, "bowler": 5,"all-rounder": 3, "wicketkeeper": 1}
+    role_count = 0
+    for team_player in team_players:
+        old_player = session.query(Players).filter_by(id=team_player.player_id).first()
+        if old_player and old_player.role == player.role:
+            role_count += 1
+    if role_count >= role_limits[player.role]:
+        session.close()
+        return False
+    new_player = FantasyTeamPlayers(fantasy_team_id=fantasy_team_id, player_id=player_id)
+
+    session.add(new_player)
+    session.commit()
+    session.close()
+    return {"message": "Player added to fantasy team successfully"}
+
+
+# E11
+def create_contest(user_name, contest_name, match_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    match = session.query(Matches).filter_by(id=match_id).first()
+    if user is None or match is None:
+        session.close()
+        return False
+    contest = Contests(contest_name=contest_name, match_id=match_id,created_by=user.id)
+    session.add(contest)
+    session.commit()
+    contest_id = contest.id
+    session.close()
+    return {"message": "Contest created successfully", "contest_id": contest_id, "contest_name": contest_name, "match_id": match_id}
+
+
+#E14
+def get_contest_leaderboard(contest_id):
+    session = Session(engine)
+    contest = session.query(Contests).filter_by(id=contest_id).first()
+    if contest is None:
+        session.close()
+        return False
+    entries = session.query(ContestEntries).filter_by(contest_id=contest_id).all()
+    leaderboard = []
+    for entry in entries:
+        fantasy_team = session.query(FantasyTeams).filter_by(id=entry.fantasy_team_id).first()
+        user = session.query(Users).filter_by(id=entry.user_id).first()
+        if fantasy_team is None or user is None:
+            continue
+        team_players = session.query(FantasyTeamPlayers).filter_by(fantasy_team_id=fantasy_team.id).all()
+        total_points = 0
+        for team_player in team_players:
+            performance = session.query(PlayerPerformances).filter_by(match_id=contest.match_id,player_id=team_player.player_id).first()
+            if performance:
+                total_points = total_points + performance.fantasy_points
+        leaderboard.append({"user_name": user.user_name,"fantasy_team_id": fantasy_team.id,"team_name": fantasy_team.team_name,"points": total_points})
+
+    for i in range(len(leaderboard)):
+        for j in range(i + 1, len(leaderboard)):
+            if leaderboard[j]["points"] > leaderboard[i]["points"]:
+                temp = leaderboard[i]
+                leaderboard[i] = leaderboard[j]
+                leaderboard[j] = temp
+    rank = 1
+    for item in leaderboard:
+        item["rank"] = rank
+        rank = rank + 1
+    session.close()
+    return leaderboard

@@ -60,18 +60,6 @@ def add_player(data: Player, token: str = Header()):
         raise HTTPException(status_code=400, detail="Invalid player role")
     return result
 
-# E3 
-@app.get("/players")
-def get_players(role: str = None, team: str = None):
-    return functions.get_all_players(role, team)
-
-# E4
-@app.get("/players/{player_id}")
-def get_player(player_id: int):
-    result = functions.get_player_by_id(player_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Player not found")
-    return result
 
 # E5 
 @app.post("/tournaments")
@@ -85,3 +73,36 @@ def add_tournament(data: Tournament, token: str = Header()):
     if not result:
         raise HTTPException(status_code=400, detail="Could not create tournament")
     return result
+
+
+# E8
+@app.post("/fantasy-teams/{fantasy_team_id}/players")
+def add_player_to_team(fantasy_team_id: int, data: FantasyTeamPlayer, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    result = functions.add_player_to_fantasy_team( user_name,fantasy_team_id, data.player_id)
+    if not result:
+        raise HTTPException( status_code=400,detail="Could not add player. Check team ownership, deadline, role limit and 11-player limit.")
+    return result
+
+
+#E11
+@app.post("/contests")
+def add_contest(data: Contest, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "organizer")
+    result = functions.create_contest(user_name, data.contest_name, data.match_id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Invalid match")
+    return result
+
+
+
+#E14
+@app.get("/contests/{contest_id}/leaderboard")
+def get_leaderboard(contest_id: int):
+    result = functions.get_contest_leaderboard(contest_id)
+    if result is False:
+        raise HTTPException(status_code=404, detail="Contest not found")
+    return result
+
