@@ -15,18 +15,18 @@ The application includes role-based access for admins, organizers and users. Org
 
 | Role | Member | Responsibility |
 |---|---|---|
-| Backend Developer | Member 1 - Lakshya | Tables and Authentication, API 2(login),Implimented 5 endpoints and repository/deployment setup |
-| Backend Developer | Member 2 - Thammiksha |API 3(Refersh), Implimented 5 endpoints,repository/deployment setup |
-| Backend Developer | Member 3 - Thanmayee |  API 1 (Register), Implimented 5 endpoints,repository/deployment setup |
+| Backend Developer | Lakshya | Tables and Authentication, API 2(login),Implimented 5 endpoints and repository/deployment setup |
+| Backend Developer | Thammiksha |API 3(Refersh), Implimented 5 endpoints,repository/deployment setup |
+| Backend Developer | Thanmayee |  API 1 (Register), Implimented 5 endpoints,repository/deployment setup |
 
 
 ### 3-Day Work Plan
 
 | Member | Day 1 | Day 2 | Day 3 |
 |---|---|---|---|
-| Member 1 - Lakshya | Implimented Tables and repository/deployment setup | Implimented Authentication and Implimented API's and Endpoints 1,4 | Implimented remaining endpoints and updated README.md. |
-| Member 2 - Thammiksha | Implimented Tables and repository/deployment setup | Implimented API's and Implimented Endpoints 2,5 | Implimented reaming endpoints and README.md |
-| Member 3 - Thanmayee | Implimented Tables and repository/deployment setup|  Implimented API's and Implimented Endpoints 3,6 |Implimented reaming endpoints and README.md |
+| Lakshya | Implimented Tables and repository/deployment setup | Implimented Authentication and Implimented API's and Endpoints 1,4 | Implimented remaining endpoints and updated README.md. |
+| Thammiksha | Implimented Tables and repository/deployment setup | Implimented API's and Implimented Endpoints 2,5 | Implimented reaming endpoints and README.md |
+| Thanmayee | Implimented Tables and repository/deployment setup|  Implimented API's and Implimented Endpoints 3,6 |Implimented reaming endpoints and README.md |
 
 ## 3. Live App
 
