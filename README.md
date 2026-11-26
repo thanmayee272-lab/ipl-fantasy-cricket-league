@@ -15,27 +15,26 @@ The application includes role-based access for admins, organizers and users. Org
 
 | Role | Member | Responsibility |
 |---|---|---|
-| Backend Developer | Member 1 - [Lakshya] | Tables and Authentication, API 2(login),Implimented 5 endpoints and repository/deployment setup |
-| Backend Developer | Member 2 - [Thammiksha] |API 3(Refersh), Implimented 5 endpoints,repository/deployment setup |
-| Backend Developer | Member 3 - [Thanmayee] |  API 1 (Register), Implimented 5 endpoints,repository/deployment setup |
+| Backend Developer | Member 1 - Lakshya | Tables and Authentication, API 2(login),Implimented 5 endpoints and repository/deployment setup |
+| Backend Developer | Member 2 - Thammiksha |API 3(Refersh), Implimented 5 endpoints,repository/deployment setup |
+| Backend Developer | Member 3 - Thanmayee |  API 1 (Register), Implimented 5 endpoints,repository/deployment setup |
 
 
 ### 3-Day Work Plan
 
 | Member | Day 1 | Day 2 | Day 3 |
 |---|---|---|---|
-| Member 1 - [Lakshya] | Implimented Tables and repository/deployment setup | Implimented Authentication and Implimented API's and Endpoints 1,4 | Implimented remaining endpoints and updated README.md. |
-| Member 2 - [Thammiksha] | Implimented Tables and repository/deployment setup | Implimented API's and Implimented Endpoints 2,5 | Implimented reaming endpoints and README.md |
-| Member 3 - [Thanmayee] | Implimented Tables and repository/deployment setup|  Implimented API's and Implimented Endpoints 3,6 |Implimented reaming endpoints and README.md |
+| Member 1 - Lakshya | Implimented Tables and repository/deployment setup | Implimented Authentication and Implimented API's and Endpoints 1,4 | Implimented remaining endpoints and updated README.md. |
+| Member 2 - Thammiksha | Implimented Tables and repository/deployment setup | Implimented API's and Implimented Endpoints 2,5 | Implimented reaming endpoints and README.md |
+| Member 3 - Thanmayee | Implimented Tables and repository/deployment setup|  Implimented API's and Implimented Endpoints 3,6 |Implimented reaming endpoints and README.md |
 
 ## 3. Live App
 
 | Item | URL |
 |---|---|
-| API | http://[EC2-PUBLIC-IP]:8001 |
-| Swagger Documentation | http://[EC2-PUBLIC-IP]:8001/docs |
-| Docker Hub Image | [Docker Hub repository/image] |
-| GitHub Repository | [GitHub repository URL] |
+| API |  http://0.0.0.0:8000  |
+| Swagger Documentation | http://32.199.180.3:8000/docs |
+| Docker Hub Image | lakhya1196/ipl-fantasy:v1.0.1 |
 
 ## 4. How to Run It
 ### Run Locally
@@ -49,37 +48,13 @@ python -m venv .venv
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 
-uvicorn main:app --reload --host 0.0.0.0 --port 8001
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
-
 Open:
+<img width="748" height="618" alt="image" src="https://github.com/user-attachments/assets/8b8d925a-0d4b-480d-9304-9373e9c881d9" />
 
-- API: http://127.0.0.1:8001
-- Swagger: http://127.0.0.1:8001/docs
-
-### Run with Docker
-
-Run this command from the `backend` directory:
-
-```bash
-docker build -t ipl-fantasy-cricket-backend .
-docker run --rm --name ipl-fantasy-cricket \
-  -p 8001:8001 \
-  -v "${PWD}\data:/app/data" \
-  ipl-fantasy-cricket-backend
-```
-
-Stop the container:
-
-```bash
-docker rm -f ipl-fantasy-cricket
-```
-
-Configure the application database path to use the mounted `/app/data` directory so that SQLite records remain outside the container.
 
 ## 5. API Contract
-
-All request and response bodies use JSON unless stated otherwise. Use the access token in the `Authorization: Bearer <token>` header for protected endpoints.
 
 ### Authentication APIs
 
@@ -179,8 +154,6 @@ Example request bodies:
 
 ## 7. Database Design
 
-SQLite tables must include relationships among users, roles, players, tournaments, matches, fantasy teams, contests and performance records. Suggested entities:
-
 - `users`
 - `roles`
 - `players`
@@ -196,29 +169,17 @@ SQLite tables must include relationships among users, roles, players, tournament
 ## 8. Docker and AWS Deployment
 
 - Build the FastAPI application as a Docker image.
-- Run the container on port `8001`.
-- Mount a host directory to the container's `/app/data` directory.
-- Store the SQLite database in `/app/data`.
+- Run the container on port `8000`.
 - Use an AWS EC2 instance with a public IP.
-- Configure the EC2 security group to allow SSH and TCP port `8001`.
-- Access the public API at `http://<EC2-PUBLIC-IP>:8001`.
+- Configure the EC2 security group to allow SSH and TCP port `8000`.
+- Access the public API at `http://32.199.180.3:8000/docs`.
 
 ## 9. CI/CD Deployment
 
-GitHub Actions must build the Docker image, push it to Docker Hub and deploy it to EC2.
+GitHub Actions build the Docker image, push it to Docker Hub and deploy it to EC2.
 
 Configure the GitHub Actions secrets.
 
-Deployment should pull the latest image, stop and remove the existing container, and start a replacement with the SQLite directory mounted persistently.
+Deployment pulls the latest image, stop and remove the existing container, and start a replacement with the SQLite directory mounted persistently.
+<img width="928" height="814" alt="Screenshot 2026-11-26 120347" src="https://github.com/user-attachments/assets/cb7f1eab-3b2e-4311-9460-2c2c591b12c8" />
 
-## 10. Submission Checklist
-
-- [ ] FastAPI source code in the GitHub repository
-- [ ] README and Swagger API documentation
-- [ ] Pydantic validation and JWT role-based access control
-- [ ] 3 authentication APIs and 15 project-specific APIs
-- [ ] Dockerfile and Docker Hub image
-- [ ] GitHub Actions workflow
-- [ ] Working EC2 deployment and public API URL
-- [ ] Persistent SQLite database outside the container
-- [ ] Meaningful commits and evidence from all three team members
