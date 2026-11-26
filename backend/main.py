@@ -73,8 +73,6 @@ def get_player(player_id: int):
         raise HTTPException(status_code=404, detail="Player not found")
     return result
 
-
-
 # E5 
 @app.post("/tournaments")
 def add_tournament(data: Tournament, token: str = Header()):
@@ -88,8 +86,17 @@ def add_tournament(data: Tournament, token: str = Header()):
         raise HTTPException(status_code=400, detail="Could not create tournament")
     return result
 
-
 # E6
 @app.get("/tournaments")
 def get_tournaments():
     return functions.get_all_tournaments()
+
+# E7 
+@app.post("/fantasy-teams")
+def add_fantasy_team(data: FantasyTeam, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    result = functions.create_fantasy_team(user_name, data.team_name, data.match_id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Invalid match")
+    return result

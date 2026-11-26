@@ -257,7 +257,6 @@ def create_tournament(user_name, tournament_name, season, matches):
         "season": season,
         "matches": match_list}
 
-
 # E6
 def get_all_tournaments():
     session = Session(engine)
@@ -275,10 +274,22 @@ def get_all_tournaments():
                 "venue": match.venue,
                 "match_time": match.match_time,
                 "deadline": match.deadline,
-                "status": match.status
-            }) 
-
+                "status": match.status}) 
         response.append({"id": tournament.id,"tournament_name": tournament.tournament_name,"season": tournament.season,"matches": match_list})
     session.close()
     return response
 
+# E7
+def create_fantasy_team(user_name, team_name, match_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    match = session.query(Matches).filter_by(id=match_id).first()
+    if user is None or match is None:
+        session.close()
+        return False
+    team = FantasyTeams(team_name=team_name,user_id=user.id, match_id=match_id)
+    session.add(team)
+    session.commit()
+    team_id = team.id
+    session.close()
+    return {"message": "Fantasy team created successfully", "fantasy_team_id": team_id, "team_name": team_name, "match_id": match_id}
