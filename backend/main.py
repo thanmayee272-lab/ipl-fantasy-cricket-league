@@ -111,7 +111,6 @@ def add_player_to_team(fantasy_team_id: int, data: FantasyTeamPlayer, token: str
         raise HTTPException( status_code=400,detail="Could not add player. Check team ownership, deadline, role limit and 11-player limit.")
     return result
 
-
 # E9
 @app.delete("/fantasy-teams/{fantasy_team_id}/players/{player_id}")
 def remove_player_from_team(fantasy_team_id: int,player_id: int, token: str = Header()):

@@ -342,7 +342,6 @@ def add_player_to_fantasy_team(user_name, fantasy_team_id, player_id):
     session.close()
     return {"message": "Player added to fantasy team successfully"}
 
-
 # E9
 def remove_player_from_fantasy_team(user_name, fantasy_team_id, player_id):
     session = Session(engine)
