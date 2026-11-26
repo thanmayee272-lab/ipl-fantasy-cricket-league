@@ -407,3 +407,37 @@ def create_contest(user_name, contest_name, match_id):
     return {"message": "Contest created successfully", "contest_id": contest_id, "contest_name": contest_name, "match_id": match_id}
 
 
+# E12
+def join_contest(user_name, contest_id, fantasy_team_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    contest = session.query(Contests).filter_by(id=contest_id).first()
+    fantasy_team = session.query(FantasyTeams).filter_by(id=fantasy_team_id).first()
+    if user is None or contest is None or fantasy_team is None:
+        session.close()
+        return False
+    if fantasy_team.user_id != user.id:
+        session.close()
+        return False
+    if fantasy_team.match_id != contest.match_id:
+        session.close()
+        return False
+    match = session.query(Matches).filter_by(id=contest.match_id).first()
+    if match is None:
+        session.close()
+        return False
+    deadline = match.deadline
+    if deadline is not None:
+        if datetime.now() > deadline:
+            session.close()
+            return False
+    existing_entry = session.query(ContestEntries).filter_by( contest_id=contest_id,fantasy_team_id=fantasy_team_id).first()
+    if existing_entry is not None:
+        session.close()
+        return False
+    entry = ContestEntries(contest_id=contest_id,fantasy_team_id=fantasy_team_id, user_id=user.id)
+    session.add(entry)
+    session.commit()
+    session.close()
+    return {"message": "Joined contest successfully"}
+

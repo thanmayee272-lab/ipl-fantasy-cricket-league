@@ -137,3 +137,14 @@ def add_contest(data: Contest, token: str = Header()):
     if not result:
         raise HTTPException(status_code=400, detail="Invalid match")
     return result
+
+
+# E12 - User joins contest with fantasy team
+@app.post("/contests/{contest_id}/join")
+def join_contest(contest_id: int, data: JoinContest,token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    result = functions.join_contest(user_name, contest_id, data.fantasy_team_id)
+    if not result:
+        raise HTTPException(status_code=400,detail="Could not join contest. Check team ownership, match and deadline.")
+    return result
