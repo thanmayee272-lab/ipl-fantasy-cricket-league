@@ -1,39 +1,40 @@
-from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel, Field
-from datetime import datetime, timezone, timedelta
-import functions 
+from datetime import datetime
 
 class User(BaseModel):
-    username: str
+    user_name: str
     password: str
+    user_type: str
 
 class UserLogin(BaseModel):
-    user_name: str = Field(min_length=1)
-    password: str = Field(min_length=1)
+    user_name: str
+    password: str
 
-class RefreshToken:
-    refresh_token: str  
+class RefreshToken(BaseModel):
+    refresh_token: str
 
 class Organizer(BaseModel):
-    username: str
+    user_name: str
     password: str
 
 class Player(BaseModel):
-    player_name: str
+    name: str
     role: str
     team: str
-    base_points: float
+    base_points: int = 0
 
 class Match(BaseModel):
+    match_name: str
     team_1: str
     team_2: str
     venue: str
     match_time: datetime
+    deadline: datetime
 
 class Tournament(BaseModel):
     tournament_name: str
     season: str
-    matches: list[Match] = Field(default=list)
+    matches: list[Match] = []
 
 class FantasyTeam(BaseModel):
     team_name: str
