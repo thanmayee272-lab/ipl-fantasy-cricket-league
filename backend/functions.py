@@ -492,3 +492,39 @@ def publish_performances(match_id, performances):
     session.commit()
     session.close()
     return {"message": "Player performances published successfully"}
+
+#E14
+def get_contest_leaderboard(contest_id):
+    session = Session(engine)
+    contest = session.query(Contests).filter_by(id=contest_id).first()
+    if contest is None:
+        session.close()
+        return False
+    entries = session.query(ContestEntries).filter_by(contest_id=contest_id).all()
+    leaderboard = []
+    for entry in entries:
+        fantasy_team = session.query(FantasyTeams).filter_by(id=entry.fantasy_team_id).first()
+        user = session.query(Users).filter_by(id=entry.user_id).first()
+        if fantasy_team is None or user is None:
+            continue
+        team_players = session.query(FantasyTeamPlayers).filter_by(fantasy_team_id=fantasy_team.id).all()
+        total_points = 0
+        for team_player in team_players:
+            performance = session.query(PlayerPerformances).filter_by(match_id=contest.match_id,player_id=team_player.player_id).first()
+            if performance:
+                total_points = total_points + performance.fantasy_points
+        leaderboard.append({"user_name": user.user_name,"fantasy_team_id": fantasy_team.id,"team_name": fantasy_team.team_name,"points": total_points})
+
+    for i in range(len(leaderboard)):
+        for j in range(i + 1, len(leaderboard)):
+            if leaderboard[j]["points"] > leaderboard[i]["points"]:
+                temp = leaderboard[i]
+                leaderboard[i] = leaderboard[j]
+                leaderboard[j] = temp
+    rank = 1
+    for item in leaderboard:
+        item["rank"] = rank
+        rank = rank + 1
+    session.close()
+    return leaderboard
+

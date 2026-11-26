@@ -162,3 +162,11 @@ def add_performances( match_id: int,data: MatchPerformance, token: str = Header(
     if not result:
         raise HTTPException( status_code=400, detail="Could not publish performances. Check match, players and duplicate records." )
     return result
+
+#E14
+@app.get("/contests/{contest_id}/leaderboard")
+def get_leaderboard(contest_id: int):
+    result = functions.get_contest_leaderboard(contest_id)
+    if result is False:
+        raise HTTPException(status_code=404, detail="Contest not found")
+    return result
