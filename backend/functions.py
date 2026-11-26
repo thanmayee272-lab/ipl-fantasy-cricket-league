@@ -178,3 +178,91 @@ def get_player_by_id(player_id):
     response = {"id": player.id, "name": player.name, "role": player.role, "team": player.team, "base_points": player.base_points}
     session.close()
     return response
+
+# E7
+def create_fantasy_team(user_name, team_name, match_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    match = session.query(Matches).filter_by(id=match_id).first()
+    if user is None or match is None:
+        session.close()
+        return False
+    team = FantasyTeams(team_name=team_name,user_id=user.id, match_id=match_id)
+    session.add(team)
+    session.commit()
+    team_id = team.id
+    session.close()
+    return {"message": "Fantasy team created successfully", "fantasy_team_id": team_id, "team_name": team_name, "match_id": match_id}
+
+# E10
+def get_my_fantasy_teams(user_name):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    if user is None:
+        session.close()
+        return []
+    teams = session.query(FantasyTeams).filter_by(user_id=user.id).all()
+    response = []
+    for team in teams:
+        team_players = session.query(FantasyTeamPlayers).filter_by(fantasy_team_id=team.id).all()
+        players = []
+        for team_player in team_players:
+            player = session.query(Players).filter_by(id=team_player.player_id).first()
+            if player:
+                players.append({"id": player.id,"name": player.name,"role": player.role,"team": player.team,"base_points": player.base_points})
+        response.append({"fantasy_team_id": team.id,"team_name": team.team_name,"match_id": team.match_id,"players": players})
+    session.close()
+    return response
+
+def calculate_fantasy_points(player, performance):
+    points = player.base_points
+    points = points + (performance["runs"])
+    points = points + (performance["fours"])
+    points = points + (performance["sixes"] * 2)
+    points = points + (performance["wickets"] * 25)
+    points = points + (performance["catches"] * 8)
+    points = points + (performance["run_outs"] * 12)
+    points = points + (performance["stumpings"] * 12)
+    return points
+
+# E13
+def publish_performances(match_id, performances):
+    session = Session(engine)
+    match = session.query(Matches).filter_by(id=match_id).first()
+    if match is None:
+        session.close()
+        return False
+    seen_ids = []
+    for performance in performances:
+        player_id = performance["player_id"]
+        if player_id in seen_ids:
+            session.close()
+            return False
+        seen_ids.append(player_id)
+        player = session.query(Players).filter_by(id=player_id).first()
+        if player is None:
+            session.close()
+            return False
+        old_performance = session.query(PlayerPerformances).filter_by(match_id=match_id,player_id=player_id).first()
+        if old_performance is not None:
+            session.close()
+            return False
+    for performance in performances:
+        player = session.query(Players).filter_by(id=performance["player_id"]).first()
+        points = calculate_fantasy_points(player, performance)
+        new_performance = PlayerPerformances(
+            match_id=match_id,
+            player_id=performance["player_id"],
+            runs=performance["runs"],
+            fours=performance["fours"],
+            sixes=performance["sixes"],
+            wickets=performance["wickets"],
+            catches=performance["catches"],
+            run_outs=performance["run_outs"],
+            stumpings=performance["stumpings"],
+            fantasy_points=points)
+        session.add(new_performance)
+    match.status = "completed"
+    session.commit()
+    session.close()
+    return {"message": "Player performances published successfully"}
