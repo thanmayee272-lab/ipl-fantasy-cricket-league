@@ -170,3 +170,11 @@ def get_leaderboard(contest_id: int):
     if result is False:
         raise HTTPException(status_code=404, detail="Contest not found")
     return result
+
+
+# E15 - User views own fantasy points history
+@app.get("/users/me/points-history")
+def get_my_points_history(token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "user")
+    return functions.get_points_history(user_name)

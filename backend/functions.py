@@ -528,3 +528,24 @@ def get_contest_leaderboard(contest_id):
     session.close()
     return leaderboard
 
+
+# E15
+def get_points_history(user_name):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    if user is None:
+        session.close()
+        return []
+    teams = session.query(FantasyTeams).filter_by(user_id=user.id).all()
+    history = []
+    for team in teams:
+        match = session.query(Matches).filter_by(id=team.match_id).first()
+        team_players = session.query(FantasyTeamPlayers).filter_by(fantasy_team_id=team.id).all()
+        total_points = 0
+        for team_player in team_players:
+            performance = session.query(PlayerPerformances).filter_by(match_id=team.match_id, player_id=team_player.player_id).first()
+            if performance:
+                total_points = total_points + performance.fantasy_points
+        history.append({"fantasy_team_id": team.id,"team_name": team.team_name, "match_id": team.match_id, "match_name": match.match_name if match else None, "points": total_points})
+    session.close()
+    return history
