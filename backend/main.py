@@ -127,3 +127,13 @@ def get_my_teams(token: str = Header()):
     user_name = get_logged_in_user(token)
     check_role(user_name, "user")
     return functions.get_my_fantasy_teams(user_name)
+
+#E11
+@app.post("/contests")
+def add_contest(data: Contest, token: str = Header()):
+    user_name = get_logged_in_user(token)
+    check_role(user_name, "organizer")
+    result = functions.create_contest(user_name, data.contest_name, data.match_id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Invalid match")
+    return result

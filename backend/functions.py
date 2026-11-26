@@ -391,3 +391,19 @@ def get_my_fantasy_teams(user_name):
     session.close()
     return response
 
+# E11
+def create_contest(user_name, contest_name, match_id):
+    session = Session(engine)
+    user = session.query(Users).filter_by(user_name=user_name).first()
+    match = session.query(Matches).filter_by(id=match_id).first()
+    if user is None or match is None:
+        session.close()
+        return False
+    contest = Contests(contest_name=contest_name, match_id=match_id,created_by=user.id)
+    session.add(contest)
+    session.commit()
+    contest_id = contest.id
+    session.close()
+    return {"message": "Contest created successfully", "contest_id": contest_id, "contest_name": contest_name, "match_id": match_id}
+
+
